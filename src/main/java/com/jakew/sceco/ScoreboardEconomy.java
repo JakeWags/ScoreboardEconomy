@@ -9,8 +9,11 @@ import static net.minecraft.server.command.CommandManager.argument;
 import com.jakew.sceco.registry.ModItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,25 +26,27 @@ public class ScoreboardEconomy implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // pay command
+        /* Pay Command
+         * Use: /pay <PLAYER> <AMOUNT>
+         * Expected: The target player will receive the AMOUNT of credits and the same amount will be removed from the sender
+         */
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-
             dispatcher.register(
                 literal("pay")
                     .then(
                         argument("target", string())
-                                .suggests((context, builder) -> {
-                                    Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
-                                    Collection<String> knownPlayers = scoreboard.getKnownPlayers();
+                            .suggests((context, builder) -> {
+                                Scoreboard scoreboard = context.getSource().getServer().getScoreboard();
+                                Collection<String> knownPlayers = scoreboard.getKnownPlayers();
 
-                                    for(String playerName : knownPlayers) {
-                                        if (playerName != null) {
-                                            builder.suggest(playerName);
-                                        }
+                                for(String playerName : knownPlayers) {
+                                    if (playerName != null) {
+                                        builder.suggest(playerName);
                                     }
+                                }
 
-                                    return builder.buildFuture();
-                                })
+                                return builder.buildFuture();
+                            })
                         .then(
                         argument("amount", integer())
                             .executes(c -> {
@@ -71,8 +76,11 @@ public class ScoreboardEconomy implements ModInitializer {
                                     source.getPlayer().sendMessage(Text.of("§4ERROR: Invalid input."), false);
                                     return 0;
                                 } else {
-                                    scoreboard.getPlayerScore(target_name, money_objective).incrementScore(toSendAmount);
-                                    scoreboard.getPlayerScore(sourceName, money_objective).incrementScore(-1*toSendAmount);
+                                    incrementCredits(scoreboard, target_name, toSendAmount);
+                                    incrementCredits(scoreboard, sourceName, -1*toSendAmount);
+
+                                    // scoreboard.getPlayerScore(target_name, money_objective).incrementScore(toSendAmount);
+                                    // scoreboard.getPlayerScore(sourceName, money_objective).incrementScore(-1*toSendAmount);
 
                                     source.getPlayer().sendMessage(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
 
@@ -93,7 +101,50 @@ public class ScoreboardEconomy implements ModInitializer {
             );
         });
 
+        /* GetCoin Command
+         * Use: /getCoin <AMOUNT>
+         * Expected: The player will receive the AMOUNT of coin items into their inventory, each worth one credit
+         * TODO: Find coins in inventory and add to those first before making a new stack
+         */
+        CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
+            dispatcher.register(
+                literal("getCoin")
+                    .then(
+                        argument("amount", integer())
+                            .executes(c -> {
+                                ServerCommandSource source = c.getSource();
+                                Scoreboard scoreboard = source.getServer().getScoreboard();
+                                PlayerEntity playerSource = source.getPlayer();
+                                ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
+                                ScoreboardPlayerScore playerScore = scoreboard.getPlayerScore(playerSource.getName().asString(), money_objective);
+
+
+                                int amount = getInteger(c, "amount");
+
+                                if (playerScore.getScore() < amount) {
+                                    playerSource.sendMessage(Text.of("§4ERROR: You do not have enough Credits."), false);
+                                    return 0;
+                                } else if (playerSource.getInventory().getEmptySlot() < 0) {
+                                    playerSource.sendMessage(Text.of("§4ERROR: You do not have inventory space."), false);
+                                    return 0;
+                                } else {
+                                    ItemStack coinStack = new ItemStack(ModItems.COIN);
+                                    coinStack.setCount(amount);
+
+                                    playerSource.getInventory().insertStack(coinStack);
+                                    incrementCredits(scoreboard, playerSource.getName().asString(), -1*amount);
+                                }
+
+                                return 1;
+                            })
+                    )
+            );
+        }));
+
         ModItems.registerItems();
     }
 
+    public static void incrementCredits(Scoreboard scoreboard, String playerName, int amount) {
+        scoreboard.getPlayerScore(playerName, scoreboard.getObjective("Credits")).incrementScore(amount);
+    }
 }
