@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "paycommand",
+  "version": "${version}",
+  "name": "FabricScriptTesting",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/icon.jpg",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.jakew.sceco.ScoreboardEconomy"
+    ]
+  },
+  "mixins": [
+
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.5",
+    "minecraft": "1.18"
+  }
+}
