@@ -18,7 +18,6 @@ public class Coin extends Item {
     /*  COIN use behavior
      *  Expected: When player right clicks with credits in hand, those credits are added to their scoreboard score
      *            and the coin items are removed from the player's hand.
-     *  TODO: Write /getCoin <amount> command in ScoreboardEconomy.java
      */
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {

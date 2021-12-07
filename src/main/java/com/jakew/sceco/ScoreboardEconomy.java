@@ -59,9 +59,6 @@ public class ScoreboardEconomy implements ModInitializer {
                                 int playerScore = scoreboard.getPlayerScore(sourceName, money_objective).getScore();
                                 int toSendAmount = getInteger(c, "amount");
 
-                                //ServerPlayerEntity target = getPlayer(c, "target");          for playerArgumentType
-                                //String target_name = target.getName().asString();            for playerArgumentType
-
                                 String target_name = getString(c, "target");
                                 ServerPlayerEntity target = source.getServer().getPlayerManager().getPlayer(target_name);
 
@@ -78,9 +75,6 @@ public class ScoreboardEconomy implements ModInitializer {
                                 } else {
                                     incrementCredits(scoreboard, target_name, toSendAmount);
                                     incrementCredits(scoreboard, sourceName, -1*toSendAmount);
-
-                                    // scoreboard.getPlayerScore(target_name, money_objective).incrementScore(toSendAmount);
-                                    // scoreboard.getPlayerScore(sourceName, money_objective).incrementScore(-1*toSendAmount);
 
                                     source.getPlayer().sendMessage(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
 
@@ -101,14 +95,13 @@ public class ScoreboardEconomy implements ModInitializer {
             );
         });
 
-        /* GetCoin Command
-         * Use: /getCoin <AMOUNT>
+        /* Withdraw Command
+         * Use: /withdraw <AMOUNT>
          * Expected: The player will receive the AMOUNT of coin items into their inventory, each worth one credit
-         * TODO: Find coins in inventory and add to those first before making a new stack
          */
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
             dispatcher.register(
-                literal("getCoin")
+                literal("withdraw")
                     .then(
                         argument("amount", integer())
                             .executes(c -> {
@@ -124,14 +117,8 @@ public class ScoreboardEconomy implements ModInitializer {
                                 if (playerScore.getScore() < amount) {
                                     playerSource.sendMessage(Text.of("§4ERROR: You do not have enough Credits."), false);
                                     return 0;
-                                } else if (playerSource.getInventory().getEmptySlot() < 0) {
-                                    playerSource.sendMessage(Text.of("§4ERROR: You do not have inventory space."), false);
-                                    return 0;
                                 } else {
-                                    ItemStack coinStack = new ItemStack(ModItems.COIN);
-                                    coinStack.setCount(amount);
-
-                                    playerSource.getInventory().insertStack(coinStack);
+                                    source.getServer().getCommandManager().execute(source, "give " + source.getName() + " sceco:coin " + amount);
                                     incrementCredits(scoreboard, playerSource.getName().asString(), -1*amount);
                                 }
 
