@@ -95,10 +95,12 @@ public class ScoreboardEconomy implements ModInitializer {
             );
         });
 
+        /* Command works but the coins don't
+
         /* Withdraw Command
          * Use: /withdraw <AMOUNT>
          * Expected: The player will receive the AMOUNT of coin items into their inventory, each worth one credit
-         */
+
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
             dispatcher.register(
                 literal("withdraw")
@@ -128,7 +130,9 @@ public class ScoreboardEconomy implements ModInitializer {
             );
         }));
 
-        ModItems.registerItems();
+        */
+
+        // ModItems.registerItems();
     }
 
     public static void incrementCredits(Scoreboard scoreboard, String playerName, int amount) {
