@@ -7,6 +7,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
 
 import com.jakew.sceco.registry.ModItems;
+import com.jakew.sceco.shop.ShopItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,6 +20,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
+import java.io.File;
 import java.util.Collection;
 
 public class ScoreboardEconomy implements ModInitializer {
@@ -26,8 +28,20 @@ public class ScoreboardEconomy implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        /* Pay Command
-         * Use: /pay <PLAYER> <AMOUNT>
+        /*
+         * TODO: Add /balance
+         * TODO: Add /catalog
+         *  - Add rotating shop sales
+         *  - Add fluctuating prices
+         * TODO: Add /sell <amount>    (sell x amount of items in hand)
+         * TODO: Add /ah , /auction    (maybe)
+         */
+
+
+
+        /*
+         * Pay Command
+         * Use: /pay <player> <amount>
          * Expected: The target player will receive the AMOUNT of credits and the same amount will be removed from the sender
          */
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -94,6 +108,44 @@ public class ScoreboardEconomy implements ModInitializer {
                     )
             );
         });
+
+        /*
+         * Balance Command
+         * Use: /bal , /balance
+         * Expected: Return the user's credit balance
+         */
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(
+                literal("balance")
+                        .executes(c -> {
+                            ServerCommandSource source = c.getSource();
+                            Scoreboard scoreboard = source.getServer().getScoreboard();
+                            ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
+                            int score = scoreboard.getPlayerScore(source.getName(), money_objective).getScore();
+
+                            source.getPlayer().sendMessage(Text.of(String.format("You have §3%d §fCredits.", score)), false);
+
+                            ShopItem i = new ShopItem("diamond.json");
+
+                            return 1;
+                        })
+
+            );
+        });
+
+        /* TODO: Add rotating item shop and fluctuating prices
+         * TODO: Add /catalog , /catalogue
+         * Use: /catalog , /catalogue
+         * Expected: Either print the current items for sale or open an interface with the current with their prices
+         */
+
+        /* TODO: Add /sell <amount>
+         * TODO: Add /sell <item> <amount>
+         * Use: /sell <amount>
+         * Expected: Sell the item in hand to the shop if the item is in the current shop selling rotation.
+         */
+
+
 
         /* Command works but the coins don't
 

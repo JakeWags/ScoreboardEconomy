@@ -1,4 +1,4 @@
-package com.jakew.sceco;
+package com.jakew.sceco.util;
 
 import net.minecraft.command.argument.EntityArgumentType;
 
