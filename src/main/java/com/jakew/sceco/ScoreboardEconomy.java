@@ -34,6 +34,7 @@ public class ScoreboardEconomy implements ModInitializer {
          * TODO: Add /balance
          * TODO: Add /catalog
          *  - Add rotating shop sales
+         *    - Add automatic shop rotation. (once per day?)
          *  - Add fluctuating prices
          * TODO: Add /sell <amount>    (sell x amount of items in hand)
          * TODO: Add /ah , /auction    (maybe)
