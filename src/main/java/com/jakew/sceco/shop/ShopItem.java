@@ -34,6 +34,6 @@ public class ShopItem {
 
     @Override
     public String toString() {
-        return (itemId+" is worth "+price+" Credits.");
+        return (itemId);
     }
 }

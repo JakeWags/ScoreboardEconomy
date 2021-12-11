@@ -2,23 +2,67 @@ package com.jakew.sceco.shop;
 
 import java.util.ArrayList;
 
+
+/*
+ * TODO: Changing Prices
+ * TODO: Server-wide item trade limit per cycle
+ * TODO: Automatically rotating catalog
+ */
 public class Catalog {
+    public static final String[] catalogItemNames = new String[]{"diamond", "hay_block", "lapis_block", "netherite", "quartz_block", "redstone_block"};
+
+    private int size;
 
     private ArrayList<ShopItem> catalogList = new ArrayList<>();
+    private ArrayList<ShopItem> currentList = new ArrayList<>();
 
-    public Catalog() {
-
+    public Catalog(int size) {
+        setSize(size);
+        initCatalog();
+        genCurrentList();
     }
 
-    // TODO: Add catalogList initialization
+    private void setSize(int size) {
+        this.size = size;
+    }
+
     private ArrayList<ShopItem> initCatalog() {
-        return null;
+        for(String item : catalogItemNames) {
+            catalogList.add(new ShopItem(item));
+        }
+
+        return catalogList;
     }
 
-    ShopItem diamond = new ShopItem("diamond");
-    ShopItem hay_block = new ShopItem("hay_block");
-    ShopItem lapis_lazuli = new ShopItem("lapis_lazuli");
-    ShopItem netherite = new ShopItem("netherite");
-    ShopItem quartz_block = new ShopItem("quartz_block");
-    ShopItem redstone_block = new ShopItem("redstone_block");
+    private ArrayList<ShopItem> genCurrentList() {
+        currentList.clear();
+
+        ArrayList<ShopItem> temp = (ArrayList<ShopItem>) catalogList.clone();
+        for (int i = 0; i < getSize(); i++) {
+            int j = (int)Math.round(Math.random()*(temp.size()-1));
+
+            currentList.add(temp.remove(j));
+        }
+
+        return currentList;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    @Override
+    public String toString() {
+        String s = "Current Catalog: [";
+        for (int i = 0; i < getSize(); i++) {
+            if (i != getSize()-1) {
+                s += currentList.get(i) + ", ";
+            } else {
+                s += currentList.get(i) + "]";
+            }
+        }
+        return s;
+    }
+
+
 }

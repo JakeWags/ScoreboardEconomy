@@ -38,8 +38,7 @@ public class ScoreboardEconomy implements ModInitializer {
          * TODO: Add /sell <amount>    (sell x amount of items in hand)
          * TODO: Add /ah , /auction    (maybe)
          */
-
-
+      Catalog catalog = new Catalog(4);
 
         /*
          * Pay Command
@@ -127,17 +126,32 @@ public class ScoreboardEconomy implements ModInitializer {
 
                             source.getPlayer().sendMessage(Text.of(String.format("You have §3%d §fCredits.", score)), false);
 
+                            Catalog cat = new Catalog(3);
+                            System.out.println(cat);
                             return 1;
                         })
 
             );
         });
 
-        /* TODO: Add rotating item shop and fluctuating prices
+        /*
          * TODO: Add /catalog , /catalogue
+         * TODO: Add better user interface on command run
          * Use: /catalog , /catalogue
          * Expected: Either print the current items for sale or open an interface with the current with their prices
          */
+      CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+                dispatcher.register(
+                        literal("catalog")
+                                .executes(c -> {
+
+                                  // TODO: better interface, could be in toString using block strings?
+                                  c.getSource().getPlayer().sendMessage(Text.of(catalog.toString()), false);
+
+                                  return 1;
+                                })
+                );
+              });
 
         /* TODO: Add /sell <amount>
          * TODO: Add /sell <item> <amount>
