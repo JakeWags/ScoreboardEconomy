@@ -1,5 +1,7 @@
 package com.jakew.sceco.shop;
 
+import com.jakew.sceco.shop.shopItems.*;
+
 import java.util.ArrayList;
 
 
@@ -9,7 +11,7 @@ import java.util.ArrayList;
  * TODO: Automatically rotating catalog
  */
 public class Catalog {
-    public static final String[] catalogItemNames = new String[]{"diamond", "hay_block", "lapis_block", "netherite", "quartz_block", "redstone_block"};
+    public static final String[] catalogItemNames = new String[]{"diamond", "hay_block", "lapis_block", "netherite", "quartz_block", "redstone_block", "amethyst_block"};
 
     private int size;
 
@@ -27,9 +29,13 @@ public class Catalog {
     }
 
     private ArrayList<ShopItem> initCatalog() {
-        for(String item : catalogItemNames) {
-            catalogList.add(new ShopItem(item));
-        }
+        catalogList.add(new Diamond());
+        catalogList.add(new NetheriteIngot());
+        catalogList.add(new QuartzBlock());
+        catalogList.add(new RedstoneBlock());
+        catalogList.add(new AmethystBlock());
+        catalogList.add(new LapisBlock());
+        catalogList.add(new HayBlock());
 
         return catalogList;
     }

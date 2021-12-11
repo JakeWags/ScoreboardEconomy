@@ -1,6 +1,8 @@
 plugins {
     id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'java'
 }
 
 version = project.mod_version
@@ -25,8 +27,6 @@ dependencies {
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
-
-    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 }
 
 processResources {
