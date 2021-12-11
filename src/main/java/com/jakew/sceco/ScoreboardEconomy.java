@@ -12,6 +12,7 @@ import com.jakew.sceco.shop.ShopItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
@@ -20,6 +21,8 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +30,7 @@ import java.util.Collection;
 
 public class ScoreboardEconomy implements ModInitializer {
     public static final String MOD_ID = "sceco";
+    public static Catalog catalog;
 
     @Override
     public void onInitialize() {
@@ -39,7 +43,7 @@ public class ScoreboardEconomy implements ModInitializer {
          * TODO: Add /sell <amount>    (sell x amount of items in hand)
          * TODO: Add /ah , /auction    (maybe)
          */
-      Catalog catalog = new Catalog(4);
+        catalog = new Catalog(4);
 
         /*
          * Pay Command
@@ -80,26 +84,26 @@ public class ScoreboardEconomy implements ModInitializer {
 
 
                                 if (!scoreboard.getKnownPlayers().contains(target_name)) {
-                                    source.getPlayer().sendMessage(Text.of("§4ERROR: " + target_name + " does not exist."), false);
+                                    source.sendError(Text.of("ERROR: " + target_name + " does not exist."));
                                     return 0;
                                 } else if (playerScore < toSendAmount) {
-                                    source.getPlayer().sendMessage(Text.of("§4ERROR: You do not have enough Credits."), false);
+                                    source.sendError(Text.of("ERROR: You do not have enough Credits."));
                                     return 0;
                                 } else if (toSendAmount < 1) {
-                                    source.getPlayer().sendMessage(Text.of("§4ERROR: Invalid input."), false);
+                                    source.sendError(Text.of("Error: Invalid input"));
                                     return 0;
                                 } else {
                                     incrementCredits(scoreboard, target_name, toSendAmount);
                                     incrementCredits(scoreboard, sourceName, -1*toSendAmount);
 
-                                    source.getPlayer().sendMessage(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
+                                    source.sendFeedback(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
 
                                     // if target player is offline:
                                     if (target != null) {
                                         if (!target.isDisconnected()) {
                                             target.sendMessage(Text.of("You received §3" + toSendAmount + "§f Credits from §3" + sourceName), false);
                                         } else { // this should never be hit
-                                            source.getPlayer().sendMessage(Text.of("An unexpected error has occurred. You shouldn't be seeing this..."), false);
+                                            source.sendFeedback(Text.of("An unexpected error has occurred. You shouldn't be seeing this..."), false);
                                         }
                                     }
 
@@ -125,10 +129,8 @@ public class ScoreboardEconomy implements ModInitializer {
                             ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
                             int score = scoreboard.getPlayerScore(source.getName(), money_objective).getScore();
 
-                            source.getPlayer().sendMessage(Text.of(String.format("You have §3%d §fCredits.", score)), false);
+                            source.sendFeedback(Text.of(String.format("You have §3%d §fCredits.", score)), false);
 
-                            Catalog cat = new Catalog(3);
-                            System.out.println(cat);
                             return 1;
                         })
 
@@ -142,17 +144,23 @@ public class ScoreboardEconomy implements ModInitializer {
          * Expected: Either print the current items for sale or open an interface with the current with their prices
          */
       CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-                dispatcher.register(
-                        literal("catalog")
-                                .executes(c -> {
-
-                                  // TODO: better interface, could be in toString using block strings?
-                                  c.getSource().getPlayer().sendMessage(Text.of(catalog.toString()), false);
-
-                                  return 1;
-                                })
-                );
-              });
+            dispatcher.register(
+                literal("catalog")
+                    .executes(c -> {
+                        printCatalog(c.getSource());
+                        return 1;
+                    })
+                    .then(
+                        literal("rotate").requires(source -> source.hasPermissionLevel(4)) // must be op to rotate
+                            .executes(c -> {
+                                catalog.rotateCatalog();
+                                c.getSource().sendFeedback(Text.of("Catalog rotated. The new catalog is:"), false);
+                                printCatalog(c.getSource());
+                                return 1;
+                            })
+                    )
+            );
+      });
 
         /* TODO: Add /sell <amount>
          * TODO: Add /sell <item> <amount>
@@ -204,5 +212,13 @@ public class ScoreboardEconomy implements ModInitializer {
 
     public static void incrementCredits(Scoreboard scoreboard, String playerName, int amount) {
         scoreboard.getPlayerScore(playerName, scoreboard.getObjective("Credits")).incrementScore(amount);
+    }
+
+    public static String printCatalog() {
+        return catalog.toString();
+    }
+
+    public static void printCatalog(ServerCommandSource source) {
+        source.sendFeedback(Text.of(catalog.toString()), false);
     }
 }

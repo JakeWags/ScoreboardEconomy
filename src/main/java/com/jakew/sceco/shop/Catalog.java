@@ -51,14 +51,17 @@ public class Catalog {
         return this.size;
     }
 
+    public ArrayList<ShopItem> rotateCatalog() {
+        return genCurrentList();
+    }
+
     @Override
     public String toString() {
-        String s = "Current Catalog: [";
+        String s = "The Current Catalog is: \n";
         for (int i = 0; i < getSize(); i++) {
+            s += currentList.get(i).toString() + ": §3" + currentList.get(i).getPrice() + "§f Credits";
             if (i != getSize()-1) {
-                s += currentList.get(i) + ", ";
-            } else {
-                s += currentList.get(i) + "]";
+                s += "\n";
             }
         }
         return s;
