@@ -1,15 +1,7 @@
 package com.jakew.sceco.shop;
 
-import net.minecraft.item.Item;
+import java.io.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.json.simple.JSONArray;
 import org.json.simple.parser.*;
 import org.json.simple.JSONObject;
 
@@ -17,41 +9,31 @@ import org.json.simple.JSONObject;
 public class ShopItem {
     private int price = 0;
     private String itemId = null;
+    File f;
 
-    public ShopItem(String filename) {
+    public ShopItem(String itemname) {
         try {
-            // TODO: resolve path issues
-
-            parseFile(filename);
-            File f = new File("diamond.json");
-            System.out.println(itemId);
-            System.out.println(f.getPath());
+            f = new File("../src/main/java/com/jakew/sceco/shop/shopItems/" + itemname + ".json");
+            parseFile(f);
         } catch (ParseException | IOException e) {
             System.out.println(e);
         }
     }
 
-    private void parseFile(String pathname) throws ParseException, IOException {
-        Object obj = new JSONParser().parse(new FileReader(pathname));
+    private void parseFile(File file) throws ParseException, IOException {
+        Object obj = new JSONParser().parse(new FileReader(file));
         JSONObject jo = (JSONObject) obj;
 
         itemId = (String) jo.get("id");
-    }
-
-    private void setPrice(int price) {
-
+        price = ((Long)jo.get("price")).intValue();
     }
 
     public int getPrice() {
-        return 0;
-    }
-
-    public Item getItem() {
-        return null;
+        return price;
     }
 
     @Override
     public String toString() {
-        return null;
+        return (itemId+" is worth "+price+" Credits.");
     }
 }

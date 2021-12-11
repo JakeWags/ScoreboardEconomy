@@ -7,6 +7,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
 
 import com.jakew.sceco.registry.ModItems;
+import com.jakew.sceco.shop.Catalog;
 import com.jakew.sceco.shop.ShopItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -21,6 +22,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 
 public class ScoreboardEconomy implements ModInitializer {
@@ -124,8 +126,6 @@ public class ScoreboardEconomy implements ModInitializer {
                             int score = scoreboard.getPlayerScore(source.getName(), money_objective).getScore();
 
                             source.getPlayer().sendMessage(Text.of(String.format("You have §3%d §fCredits.", score)), false);
-
-                            ShopItem i = new ShopItem("diamond.json");
 
                             return 1;
                         })
