@@ -1,17 +1,14 @@
 package com.jakew.sceco.shop;
 
-import com.jakew.sceco.shop.shopItems.*;
+import com.jakew.sceco.util.CatalogItemNotFoundException;
 
 import java.util.ArrayList;
 
-
 /*
  * TODO: Changing Prices
- * TODO: Server-wide item trade limit per cycle
- * TODO: Automatically rotating catalog
  */
 public class Catalog {
-    public static final String[] catalogItemNames = new String[]{"diamond", "hay_block", "lapis_block", "netherite", "quartz_block", "redstone_block", "amethyst_block"};
+    public ArrayList<String> catalogItemNames = new ArrayList<>(ShopItems.LIST.length);
 
     private int size;
 
@@ -29,17 +26,16 @@ public class Catalog {
     }
 
     private ArrayList<ShopItem> initCatalog() {
-        catalogList.add(new Diamond());
-        catalogList.add(new NetheriteIngot());
-        catalogList.add(new QuartzBlock());
-        catalogList.add(new RedstoneBlock());
-        catalogList.add(new AmethystBlock());
-        catalogList.add(new LapisBlock());
-        catalogList.add(new HayBlock());
+        for (int i = 0; i < ShopItems.LIST.length; i++) {
+            String[] t = ShopItems.LIST[i];
+            catalogList.add(new ShopItem(t[ShopItems.ITEM_NAME],t[ShopItems.ITEM_ID],t[ShopItems.MAX_PRICE]));
+            catalogItemNames.add(t[ShopItems.ITEM_NAME]); // item name
+        }
 
         return catalogList;
     }
 
+    @SuppressWarnings("unchecked")
     private ArrayList<ShopItem> genCurrentList() {
         currentList.clear();
 
@@ -61,17 +57,36 @@ public class Catalog {
         return genCurrentList();
     }
 
-    @Override
-    public String toString() {
-        String s = "The Current Catalog is: \n";
-        for (int i = 0; i < getSize(); i++) {
-            s += currentList.get(i).toString() + ": §3" + currentList.get(i).getPrice() + "§f Credits";
-            if (i != getSize()-1) {
-                s += "\n";
+    public ShopItem getItemInCurrentCatalog(String itemName) throws CatalogItemNotFoundException {
+        if (catalogItemNames.contains(itemName)) {
+            for (ShopItem i : currentList) {
+                if (i.getItemName().equalsIgnoreCase(itemName)) {
+                    return i;
+                }
             }
+            throw new CatalogItemNotFoundException(itemName);
         }
-        return s;
+        throw new CatalogItemNotFoundException(itemName);
     }
 
+    public ShopItem getItemInCatalog(String itemName) throws CatalogItemNotFoundException{
+        if (catalogItemNames.contains(itemName)) {
+            for (ShopItem i : catalogList) {
+                if (i.getItemName().equalsIgnoreCase(itemName)) {
+                    return i;
+                }
+            }
+        }
+        throw new CatalogItemNotFoundException(itemName);
+    }
 
+    @Override
+    public String toString() {
+        String s = "§2==============================§f \n";
+        for (int i = 0; i < getSize(); i++) {
+            s += currentList.get(i).toString() + ": §3" + currentList.get(i).getCurrentPrice() + "§f Credits\n";
+        }
+        s += "§2==============================§f";
+        return s;
+    }
 }

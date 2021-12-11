@@ -6,26 +6,19 @@ import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
 
-import com.jakew.sceco.registry.ModItems;
 import com.jakew.sceco.shop.Catalog;
 import com.jakew.sceco.shop.ShopItem;
+import com.jakew.sceco.util.CatalogItemNotFoundException;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Collection;
 
 public class ScoreboardEconomy implements ModInitializer {
@@ -167,9 +160,47 @@ public class ScoreboardEconomy implements ModInitializer {
          * Use: /sell <amount>
          * Expected: Sell the item in hand to the shop if the item is in the current shop selling rotation.
          */
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(
+                literal("sell")
+                    .then(
+                        argument("amount", integer())
+                            .executes(c -> {
+                                ServerCommandSource source = c.getSource();
+                                ItemStack stack = source.getPlayer().getMainHandStack();
+                                String itemName = stack.getItem().getName().getString();
+                                int amount = getInteger(c, "amount");
 
+                                if (stack.isEmpty()) {
+                                    source.sendError(Text.of("ERROR: Your hand is empty."));
+                                    return 0;
+                                } else if (!catalog.catalogItemNames.contains(itemName)) {
+                                    source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
+                                    return 0;
+                                } else if (amount > stack.getCount()) {
+                                    source.sendError(Text.of("ERROR: You do not have that many items in your hand."));
+                                } else if (amount <= 0) {
+                                    source.sendError(Text.of("ERROR: Invalid input."));
+                                } else {
+                                    ShopItem s;
+                                    try {
+                                        s = catalog.getItemInCurrentCatalog(itemName);
+                                    } catch (CatalogItemNotFoundException e) {
+                                        source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
+                                        return 0;
+                                    }
+                                    int profit = s.getCurrentPrice()*amount;
 
+                                    incrementCredits(source.getServer().getScoreboard(), source.getName(), profit);
+                                    stack.setCount(stack.getCount()-amount);
+                                    source.sendFeedback(Text.of("You sold " + amount + " " + itemName + " for §3" + profit + " §fCredits"), true);
+                                }
 
+                                return 1;
+                            })
+                    )
+            );
+        });
         /* Command works but the coins don't
 
         /* Withdraw Command
