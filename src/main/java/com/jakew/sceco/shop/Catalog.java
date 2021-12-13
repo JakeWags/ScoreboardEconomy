@@ -42,8 +42,10 @@ public class Catalog {
         ArrayList<ShopItem> temp = (ArrayList<ShopItem>) catalogList.clone();
         for (int i = 0; i < getSize(); i++) {
             int j = (int)Math.round(Math.random()*(temp.size()-1));
+            ShopItem t = temp.remove(j);
+            t.setPriceModifier((float) ((Math.random()*(1.2-0.75))+0.75));
 
-            currentList.add(temp.remove(j));
+            currentList.add(t);
         }
 
         return currentList;
@@ -78,6 +80,10 @@ public class Catalog {
             }
         }
         throw new CatalogItemNotFoundException(itemName);
+    }
+
+    public ArrayList<ShopItem> getCurrentList() {
+        return currentList;
     }
 
     @Override

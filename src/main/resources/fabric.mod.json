@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "paycommand",
-  "version": "1.1",
-  "name": "FabricScriptTesting",
+  "id": "sceco",
+  "version": "1.2.1",
+  "name": "ScoreboardEconomy",
   "description": "",
-  "authors": [],
+  "authors": ["Jake Wagoner"],
   "contact": {},
   "license": "MIT",
   "icon": "assets/icon.jpg",
@@ -19,6 +19,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.12.5",
-    "minecraft": "1.18"
+    "minecraft": ">=1.18"
   }
 }

@@ -28,13 +28,11 @@ public class ScoreboardEconomy implements ModInitializer {
     @Override
     public void onInitialize() {
         /*
-         * TODO: Add /balance
-         * TODO: Add /catalog
-         *  - Add rotating shop sales
-         *    - Add automatic shop rotation. (once per day?)
-         *  - Add fluctuating prices
-         * TODO: Add /sell <amount>    (sell x amount of items in hand)
+         *  TODO: catalog
+         *      - Add automatic shop rotation. (once per day?)
+         *      - Add fluctuating prices
          * TODO: Add /ah , /auction    (maybe)
+         * TODO: Add /buy (for purchasing from server)
          */
         catalog = new Catalog(4);
 
@@ -131,7 +129,6 @@ public class ScoreboardEconomy implements ModInitializer {
         });
 
         /*
-         * TODO: Add /catalog , /catalogue
          * TODO: Add better user interface on command run
          * Use: /catalog , /catalogue
          * Expected: Either print the current items for sale or open an interface with the current with their prices
@@ -155,7 +152,7 @@ public class ScoreboardEconomy implements ModInitializer {
             );
       });
 
-        /* TODO: Add /sell <amount>
+        /*
          * TODO: Add /sell <item> <amount>
          * Use: /sell <amount>
          * Expected: Sell the item in hand to the shop if the item is in the current shop selling rotation.

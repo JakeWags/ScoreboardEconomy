@@ -5,30 +5,37 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class ShopItem {
-    private int maxPrice = 0;
-    private int currentPrice = 0;
+    private float initialPrice = 0;
+    private float currentPrice = 0;
     private String itemId;
     private String itemName = "";
-    private double priceModifier = 1; // 1 for normal price, 0.50 for half, 0.25 for 1/4, so on
+    private float priceModifier = 1; // 1 for normal price, 0.50 for half, 0.25 for 1/4, so on
 
-    public ShopItem(String itemName, String itemId, int price) {
+    public ShopItem(String itemName, String itemId, float price) {
         this.itemName = itemName;
         this.itemId = itemId;
-        this.maxPrice = price;
+        this.initialPrice = price;
         this.currentPrice = getCurrentPrice();
     }
 
     public ShopItem(String itemName, String itemId, String price) {
         this.itemName = itemName;
         this.itemId = itemId;
-        this.maxPrice = Integer.parseInt(price);
+        this.initialPrice = Float.parseFloat(price);
         this.currentPrice = getCurrentPrice();
     }
 
-    public int getMaxPrice() { return maxPrice; }
+    public float getInitialPrice() { return initialPrice; }
 
     public int getCurrentPrice() {
-        return  (int)Math.round(maxPrice*priceModifier);
+        float t = initialPrice*priceModifier;
+
+        if (t > this.initialPrice+0.18) { return (int) Math.ceil(t); }
+        else if (t < this.initialPrice-0.15) {
+            if (this.initialPrice - 0.15 <= 1) { return 1; }
+            else { return (int) Math.floor(t); }
+        }
+        else { return Math.round(t); }
     }
 
     public String getId() {
@@ -43,7 +50,20 @@ public class ShopItem {
         return Registry.ITEM.get(new Identifier(itemId));
     }
 
-    public void setPriceModifier(double priceModifier) { this.priceModifier = priceModifier; }
+    public float getPriceModifier() { return this.priceModifier; }
+
+    public void setPriceModifier(float priceModifier) {
+        this.priceModifier = priceModifier;
+        refreshCurrentPrice();
+    }
+
+    public void setCurrentPrice(int currentPrice) {
+        this.currentPrice = currentPrice;
+    }
+
+    public void refreshCurrentPrice() {
+        this.currentPrice = getCurrentPrice();
+    }
 
     @Override
     public String toString() {
