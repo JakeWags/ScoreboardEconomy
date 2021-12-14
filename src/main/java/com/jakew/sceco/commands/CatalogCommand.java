@@ -17,21 +17,21 @@ import static net.minecraft.server.command.CommandManager.literal;
  * Perms: 0 for /catalog, 4 for /catalog rotate
  * Expected: Either print the current items for sale or open an interface with the current with their prices
  */
-public class CatalogCommand implements Command<Object> {
+public class CatalogCommand implements Command<ServerCommandSource> {
 
     public static String[] aliases = new String[]{"catalogue", "cat"};
 
     @Override
-    public int run(CommandContext<Object> context) throws CommandSyntaxException {
+    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         return 0;
     }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralCommandNode node = registerMain(dispatcher);
+        LiteralCommandNode<ServerCommandSource> node = registerMain(dispatcher);
         //registerAliases(dispatcher, node);
     }
 
-    private static LiteralCommandNode registerMain(CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static LiteralCommandNode<ServerCommandSource> registerMain(CommandDispatcher<ServerCommandSource> dispatcher) {
         return dispatcher.register(literal("catalog")
                 .executes(c -> {
                     printCatalog(c.getSource());
@@ -49,7 +49,7 @@ public class CatalogCommand implements Command<Object> {
         );
     }
 
-    private static void registerAliases(CommandDispatcher<ServerCommandSource> dispatcher, LiteralCommandNode node) {
+    private static void registerAliases(CommandDispatcher<ServerCommandSource> dispatcher, LiteralCommandNode<ServerCommandSource> node) {
         for (String s : aliases) {
             dispatcher.register(literal(s).redirect(node));
         }

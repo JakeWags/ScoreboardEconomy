@@ -27,20 +27,20 @@ import static net.minecraft.server.command.CommandManager.literal;
  * Use: /pay <player> <amount>
  * Expected: The target player will receive the AMOUNT of credits and the same amount will be removed from the sender
  */
-public class PayCommand implements Command<Object> {
+public class PayCommand implements Command<ServerCommandSource> {
     private static String[] aliases = new String[]{};
 
     @Override
-    public int run(CommandContext<Object> context) throws CommandSyntaxException {
+    public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         return 0;
     }
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralCommandNode node = registerMain(dispatcher);
+        LiteralCommandNode<ServerCommandSource> node = registerMain(dispatcher);
         registerAliases(dispatcher, node);
     }
 
-    private static LiteralCommandNode registerMain(CommandDispatcher<ServerCommandSource> dispatcher) {
+    private static LiteralCommandNode<ServerCommandSource> registerMain(CommandDispatcher<ServerCommandSource> dispatcher) {
         return dispatcher.register(
             literal("pay")
                 .then(
@@ -105,7 +105,7 @@ public class PayCommand implements Command<Object> {
         );
     }
 
-    private static void registerAliases(CommandDispatcher<ServerCommandSource> dispatcher, LiteralCommandNode node) {
+    private static void registerAliases(CommandDispatcher<ServerCommandSource> dispatcher, LiteralCommandNode<ServerCommandSource> node) {
         for (String s : aliases) {
             dispatcher.register(literal(s).redirect(node));
         }
