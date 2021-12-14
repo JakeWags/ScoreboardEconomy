@@ -10,6 +10,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import static com.jakew.sceco.ScoreboardEconomy.catalog;
 import static com.jakew.sceco.ScoreboardEconomy.incrementCredits;
@@ -41,40 +42,8 @@ public class SellCommand implements Command<ServerCommandSource> {
             literal("sell")
                 .then(
                     argument("amount", integer())
-                        .executes(c -> {
-                            ServerCommandSource source = c.getSource();
-                            ItemStack stack = source.getPlayer().getMainHandStack();
-                            String itemName = stack.getItem().getName().getString();
-                            int amount = getInteger(c, "amount");
-
-                            if (stack.isEmpty()) {
-                                source.sendError(Text.of("ERROR: Your hand is empty."));
-                                return 0;
-                            } else if (!catalog.catalogItemNames.contains(itemName)) {
-                                source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
-                                return 0;
-                            } else if (amount > stack.getCount()) {
-                                source.sendError(Text.of("ERROR: You do not have that many items in your hand."));
-                            } else if (amount <= 0) {
-                                source.sendError(Text.of("ERROR: Invalid input."));
-                            } else {
-                                ShopItem s;
-                                try {
-                                    s = catalog.getItemInCurrentCatalog(itemName);
-                                } catch (CatalogItemNotFoundException e) {
-                                    source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
-                                    return 0;
-                                }
-                                int profit = s.getCurrentPrice()*amount;
-
-                                incrementCredits(source.getServer().getScoreboard(), source.getName(), profit);
-                                stack.setCount(stack.getCount()-amount);
-                                source.sendFeedback(Text.of("You sold " + amount + " " + itemName + " for §3" + profit + " §fCredits"), true);
-                            }
-
-                            return 1;
-                        })
-                    )
+                        .executes(SellCommand::execute)
+                )
         );
     }
 
@@ -84,4 +53,37 @@ public class SellCommand implements Command<ServerCommandSource> {
         }
     }
 
+    public static int execute(CommandContext<ServerCommandSource> c) throws CommandSyntaxException {
+            ServerCommandSource source = c.getSource();
+            ItemStack stack = source.getPlayer().getMainHandStack();
+            String itemName = stack.getItem().getName().getString();
+            int amount = getInteger(c, "amount");
+
+            if (stack.isEmpty()) {
+                source.sendError(Text.of("ERROR: Your hand is empty."));
+                return 0;
+            } else if (!catalog.catalogItemNames.contains(itemName)) {
+                source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
+                return 0;
+            } else if (amount > stack.getCount()) {
+                source.sendError(Text.of("ERROR: You do not have that many items in your hand."));
+            } else if (amount <= 0) {
+                source.sendError(Text.of("ERROR: Invalid input."));
+            } else {
+                ShopItem s;
+                try {
+                    s = catalog.getItemInCurrentCatalog(itemName);
+                } catch (CatalogItemNotFoundException e) {
+                    source.sendError(Text.of("ERROR: " + itemName + " is not currently for sale."));
+                    return 0;
+                }
+                int profit = s.getCurrentPrice()*amount;
+
+                incrementCredits(source.getServer().getScoreboard(), source.getName(), profit);
+                stack.setCount(stack.getCount()-amount);
+                source.sendFeedback(Text.of("You sold " + amount + " " + itemName + " for §3" + profit + " §fCredits"), true);
+            }
+
+            return 1;
+        }
 }

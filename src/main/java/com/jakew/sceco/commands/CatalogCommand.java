@@ -39,12 +39,7 @@ public class CatalogCommand implements Command<ServerCommandSource> {
                 })
                 .then(
                     literal("rotate").requires(source -> source.hasPermissionLevel(4)) // must be op to rotate
-                        .executes(c -> {
-                            catalog.rotateCatalog();
-                            c.getSource().sendFeedback(Text.of("Catalog rotated. The new catalog is:"), false);
-                            printCatalog(c.getSource());
-                            return 1;
-                        })
+                        .executes(CatalogCommand::execute)
                 )
         );
     }
@@ -57,5 +52,12 @@ public class CatalogCommand implements Command<ServerCommandSource> {
 
     public static void printCatalog(ServerCommandSource source) {
         source.sendFeedback(Text.of(catalog.toString()), false);
+    }
+
+    public static int execute(CommandContext<ServerCommandSource> c) {
+        catalog.rotateCatalog();
+        c.getSource().sendFeedback(Text.of("Catalog rotated. The new catalog is:"), false);
+        printCatalog(c.getSource());
+        return 1;
     }
 }

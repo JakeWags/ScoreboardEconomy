@@ -59,47 +59,7 @@ public class PayCommand implements Command<ServerCommandSource> {
                         })
                         .then(
                             argument("amount", integer())
-                                .executes(c -> {
-                                    ServerCommandSource source = c.getSource();
-                                    CommandManager commandManager = source.getServer().getCommandManager();
-                                    Scoreboard scoreboard = source.getServer().getScoreboard();
-                                    ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
-                                    String sourceName = source.getPlayer().getName().asString();
-
-                                    int playerScore = scoreboard.getPlayerScore(sourceName, money_objective).getScore();
-                                    int toSendAmount = getInteger(c, "amount");
-
-                                    String target_name = getString(c, "target");
-                                    ServerPlayerEntity target = source.getServer().getPlayerManager().getPlayer(target_name);
-
-
-                                    if (!scoreboard.getKnownPlayers().contains(target_name)) {
-                                        source.sendError(Text.of("ERROR: " + target_name + " does not exist."));
-                                        return 0;
-                                    } else if (playerScore < toSendAmount) {
-                                        source.sendError(Text.of("ERROR: You do not have enough Credits."));
-                                        return 0;
-                                    } else if (toSendAmount < 1) {
-                                        source.sendError(Text.of("Error: Invalid input"));
-                                        return 0;
-                                    } else {
-                                        incrementCredits(scoreboard, target_name, toSendAmount);
-                                        incrementCredits(scoreboard, sourceName, -1*toSendAmount);
-
-                                        source.sendFeedback(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
-
-                                        // if target player is offline:
-                                        if (target != null) {
-                                            if (!target.isDisconnected()) {
-                                                target.sendMessage(Text.of("You received §3" + toSendAmount + "§f Credits from §3" + sourceName), false);
-                                            } else { // this should never be hit
-                                                source.sendFeedback(Text.of("An unexpected error has occurred. You shouldn't be seeing this..."), false);
-                                            }
-                                        }
-
-                                        return 1;
-                                    }
-                                })
+                                .executes(PayCommand::execute)
                             )
                 )
         );
@@ -108,6 +68,47 @@ public class PayCommand implements Command<ServerCommandSource> {
     private static void registerAliases(CommandDispatcher<ServerCommandSource> dispatcher, LiteralCommandNode<ServerCommandSource> node) {
         for (String s : aliases) {
             dispatcher.register(literal(s).redirect(node));
+        }
+    }
+
+    public static int execute(CommandContext<ServerCommandSource> c) throws CommandSyntaxException {
+        ServerCommandSource source = c.getSource();
+        Scoreboard scoreboard = source.getServer().getScoreboard();
+        ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
+        String sourceName = source.getPlayer().getName().asString();
+
+        int playerScore = scoreboard.getPlayerScore(sourceName, money_objective).getScore();
+        int toSendAmount = getInteger(c, "amount");
+
+        String target_name = getString(c, "target");
+        ServerPlayerEntity target = source.getServer().getPlayerManager().getPlayer(target_name);
+
+
+        if (!scoreboard.getKnownPlayers().contains(target_name)) {
+            source.sendError(Text.of("ERROR: " + target_name + " does not exist."));
+            return 0;
+        } else if (playerScore < toSendAmount) {
+            source.sendError(Text.of("ERROR: You do not have enough Credits."));
+            return 0;
+        } else if (toSendAmount < 1) {
+            source.sendError(Text.of("Error: Invalid input"));
+            return 0;
+        } else {
+            incrementCredits(scoreboard, target_name, toSendAmount);
+            incrementCredits(scoreboard, sourceName, -1*toSendAmount);
+
+            source.sendFeedback(Text.of("You sent §3" + toSendAmount + "§f Credits to §3" + target_name), false);
+
+            // if target player is offline:
+            if (target != null) {
+                if (!target.isDisconnected()) {
+                    target.sendMessage(Text.of("You received §3" + toSendAmount + "§f Credits from §3" + sourceName), false);
+                } else { // this should never be hit
+                    source.sendFeedback(Text.of("An unexpected error has occurred. You shouldn't be seeing this..."), false);
+                }
+            }
+
+            return 1;
         }
     }
 }

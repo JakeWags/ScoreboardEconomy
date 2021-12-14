@@ -33,16 +33,7 @@ public class BalanceCommand implements Command<ServerCommandSource> {
     private static LiteralCommandNode<ServerCommandSource> registerMain(CommandDispatcher<ServerCommandSource> dispatcher) {
         return dispatcher.register(
                 literal("balance")
-                        .executes(c -> {
-                            ServerCommandSource source = c.getSource();
-                            Scoreboard scoreboard = source.getServer().getScoreboard();
-                            ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
-                            int score = scoreboard.getPlayerScore(source.getName(), money_objective).getScore();
-
-                            source.sendFeedback(Text.of(String.format("You have §3%d §fCredits.", score)), false);
-
-                            return 1;
-                        })
+                        .executes(BalanceCommand::execute)
         );
     };
 
@@ -50,5 +41,16 @@ public class BalanceCommand implements Command<ServerCommandSource> {
         for (String s : aliases) {
             dispatcher.register(literal(s).redirect(node));
         }
+    }
+
+    public static int execute(CommandContext<ServerCommandSource> c) {
+        ServerCommandSource source = c.getSource();
+        Scoreboard scoreboard = source.getServer().getScoreboard();
+        ScoreboardObjective money_objective = scoreboard.getObjective("Credits");
+        int score = scoreboard.getPlayerScore(source.getName(), money_objective).getScore();
+
+        source.sendFeedback(Text.of(String.format("You have §3%d §fCredits.", score)), false);
+
+        return 1;
     }
 }
