@@ -30,12 +30,12 @@ public class ShopItem {
     public int getCurrentPrice() {
         float t = initialPrice*priceModifier;
 
-        if (t > this.initialPrice+0.18) { return (int) Math.ceil(t); }
-        else if (t < this.initialPrice-0.15) {
-            if (this.initialPrice - 0.15 <= 1) { return 1; }
+        if (t > this.initialPrice+0.18) { return (int) Math.ceil(t); } // round up if above
+        else if (t < this.initialPrice-0.15) {                         // round down if below
+            if (this.initialPrice - 0.15 <= 1) { return 1; }           // if rounded down = 0, replace with 1
             else { return (int) Math.floor(t); }
         }
-        else { return Math.round(t); }
+        else { return Math.round(t); }                                  // else just round back to normal price
     }
 
     public String getId() {

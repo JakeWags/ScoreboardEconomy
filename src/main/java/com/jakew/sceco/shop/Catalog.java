@@ -4,9 +4,6 @@ import com.jakew.sceco.util.CatalogItemNotFoundException;
 
 import java.util.ArrayList;
 
-/*
- * TODO: Changing Prices
- */
 public class Catalog {
     public ArrayList<String> catalogItemNames = new ArrayList<>(ShopItems.LIST.length);
 
@@ -36,14 +33,14 @@ public class Catalog {
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList<ShopItem> genCurrentList() {
+    private ArrayList<ShopItem> genCurrentList() {  // generate a brand new current list and assign price variance
         currentList.clear();
 
         ArrayList<ShopItem> temp = (ArrayList<ShopItem>) catalogList.clone();
         for (int i = 0; i < getSize(); i++) {
-            int j = (int)Math.round(Math.random()*(temp.size()-1));
+            int j = (int)Math.round(Math.random()*(temp.size()-1)); // random item from list of all items
             ShopItem t = temp.remove(j);
-            t.setPriceModifier((float) ((Math.random()*(1.2-0.75))+0.75));
+            t.setPriceModifier((float) ((Math.random()*(1.2-0.75))+0.75)); // price variance (from 75% to 120%) (avg ~97.6%)
 
             currentList.add(t);
         }
@@ -59,7 +56,7 @@ public class Catalog {
         return genCurrentList();
     }
 
-    public ShopItem getItemInCurrentCatalog(String itemName) throws CatalogItemNotFoundException {
+    public ShopItem getItemInCurrentCatalog(String itemName) throws CatalogItemNotFoundException { // current catalog items
         if (catalogItemNames.contains(itemName)) {
             for (ShopItem i : currentList) {
                 if (i.getItemName().equalsIgnoreCase(itemName)) {
@@ -71,7 +68,7 @@ public class Catalog {
         throw new CatalogItemNotFoundException(itemName);
     }
 
-    public ShopItem getItemInCatalog(String itemName) throws CatalogItemNotFoundException{
+    public ShopItem getItemInCatalog(String itemName) throws CatalogItemNotFoundException{ // all catalog items
         if (catalogItemNames.contains(itemName)) {
             for (ShopItem i : catalogList) {
                 if (i.getItemName().equalsIgnoreCase(itemName)) {
